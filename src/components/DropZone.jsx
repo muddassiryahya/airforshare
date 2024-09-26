@@ -3,11 +3,8 @@ import "./index.scss";
 
 
 
-function DropZone({ textElement }) {
-    const onDrop = acceptedFiles => {
-        // Do something with the files
-        console.log("acceptedFiles", acceptedFiles);
-    }
+function DropZone({ textElement, onDrop }) {
+    
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
     return (

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import "./index.scss";
-function TextArea({ onChange }) {
+function TextArea({ value, onChange }) {
     const textAreaRef = useRef();
 
     const resizeTextArea = (e) => {
@@ -10,6 +10,7 @@ function TextArea({ onChange }) {
     }
     return (
         <textarea
+            value={value}
             onChange={onChange}
             ref={textAreaRef}
             onInput={resizeTextArea}

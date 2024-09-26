@@ -69,6 +69,8 @@ $primary-dark-color: #745dff;
 
 .files-list {
     display: flex;
+    gap: 6px;
+    
     div{
         width: 100px;
         height: 100px;
@@ -76,6 +78,16 @@ $primary-dark-color: #745dff;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
+        
+        .file-name {
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .image-file {
+            object-fit: cover;
+        }
 
         svg {
             color: #000;
