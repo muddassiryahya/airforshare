@@ -114,10 +114,31 @@ body {
         padding: 20px 0px;
         text-align: right;
     }
+
+    .text-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .links {
+            flex: 1;
+        }
+
+        div {
+            margin-bottom: 5px;
+
+            span {
+                a {
+                    color: $primary-color;
+                }
+            }
+        }
+    }
 }
 
 .files-section {
     height: 100%;
+
     .files-header {
         display: flex;
         justify-content: space-between;

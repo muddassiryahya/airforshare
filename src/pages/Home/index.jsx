@@ -50,6 +50,10 @@ function HomePage() {
         });
     }, [])
 
+    var expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+    var regex = new RegExp(expression)
+    const links = textValue.match(regex) || [];
+
 
     return (
         <div className="container">
@@ -91,23 +95,36 @@ function HomePage() {
                                     }}
                                 />
                             </div>
-                            <div className="save-btn-section">
-                                <span onClick={clearText}>Clear</span>
-                                {isText ?
-                                    <ThemeButton
-                                        title={"Copy"}
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(textValue)
-                                        }}
-                                    />
-                                    :
-                                    <ThemeButton
-                                        disabled={textValue ? false : true}
-                                        title={"Save"}
-                                        onClick={saveChanges}
-                                    />
-                                }
+                            <div className="text-footer">
+                                <div className="links">
+                                    {links.map((v, i) => (
+                                        <div key={i}>
+                                            <span>
+                                                <a href={v} target="_blank" rel="noopener noreferrer">{v}</a>
+                                            </span>
+                                        </div>
+                                    ))
+                                    }
+                                </div>
+                                <div className="save-btn-section">
+                                    <span onClick={clearText}>Clear</span>
+                                    {isText ?
+                                        <ThemeButton
+                                            title={"Copy"}
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(textValue)
+                                            }}
+                                        />
+                                        :
+                                        <ThemeButton
+                                            disabled={textValue ? false : true}
+                                            title={"Save"}
+                                            onClick={saveChanges}
+                                        />
+                                    }
+                                </div>
                             </div>
+
                         </div>
                         :
                         <div className="files-section">
