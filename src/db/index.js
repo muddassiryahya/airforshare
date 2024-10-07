@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 
 import { getDatabase, ref, set, onValue, remove } from "firebase/database";
 
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCCtXobs-xJkngj14OKyYOlEDdRHs_r6es",
   authDomain: "learning-firebase-a34a3.firebaseapp.com",
@@ -17,11 +19,17 @@ const app = initializeApp(firebaseConfig);
 
 const db = getDatabase();
 
+const storage = getStorage();
+
 export {
     app,
     db,
     ref,
     set,
     onValue,
-    remove
+    remove,
+    storage,
+    storageRef,
+    uploadBytesResumable, 
+    getDownloadURL
 }

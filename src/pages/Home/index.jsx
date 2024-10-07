@@ -11,7 +11,12 @@ import DropZone from "../../components/DropZone";
 import FilesList from "../../components/FilesList";
 import { FaDownload } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
-import { db, set, ref, onValue, remove } from "../../db";
+import { db, set, ref, onValue, remove, storage, uploadBytesResumable, getDownloadURL, storageRef } from "../../db";
+import CodeEditor from "../../components/CodeEditor";
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+
+
 
 
 
@@ -21,32 +26,124 @@ function HomePage() {
     const [textValue, setTextValue] = useState("");
     const [isText, setIsText] = useState(false);
     const [files, setFiles] = useState([]);
+    const [tempFiles, setTempFiles] = useState([]);
 
-    const onDrop = acceptedFiles => {
-        setFiles([...files, ...acceptedFiles])
+
+    const onDrop = async acceptedFiles => {
+        setTempFiles([...tempFiles, ...acceptedFiles]);
+        let arr = [];
+        for (var i = 0; i < acceptedFiles.length; i++) {
+            arr.push(uploadFile(acceptedFiles[i], files.length + i));
+        }
+
+        const allFiles = await Promise.all(arr)
+        setFiles([...files, ...allFiles])
+        set(ref(db, 'file-sharing'), {
+            files: [...files, ...allFiles]
+        });
+        setTempFiles([]);
+    }
+
+    const uploadFile = (file, i) => {
+
+        return new Promise((resolve, reject) => {
+
+
+
+            const fileRef = storageRef(storage, `files/file${i}`);
+
+            const uploadTask = uploadBytesResumable(fileRef, file);
+
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                    switch (snapshot.state) {
+                        case 'paused':
+                            console.log('Upload is paused');
+                            break;
+                        case 'running':
+                            console.log('Upload is running');
+                            break;
+                    }
+                },
+                (error) => {
+                    reject(error);
+                },
+                () => {
+
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                        resolve({
+                            url: downloadURL,
+                            type: file.type,
+                            name: file.name
+                        });
+                    });
+                }
+            );
+        })
     }
 
     const saveChanges = () => {
-        set(ref(db, 'sharing'), {
+        set(ref(db, 'text-sharing'), {
             text: textValue
         });
 
     }
 
     const clearText = async () => {
-        await remove(ref(db, 'sharing'));
+        await remove(ref(db, 'text-sharing'));
         setTextValue("");
         setIsText(false);
     }
 
+    const deleteAllFiles = async () => {
+        await remove(ref(db, 'file-sharing'));
+        setFiles([]);
+    }
+
+    const downloadAll = () => {
+        let filename = "AllFiles";
+        const urls = files.map(v => v.url)
+        const zip = new JSZip()
+        const folder = zip.folder('project')
+        urls.forEach((url) => {
+            const blobPromise = fetch(url)
+                .then(function (response) {
+                    console.log({ response })
+                    if (response.status === 200 || response.status === 0) {
+                        return Promise.resolve(response.blob());
+                    } else {
+                        return Promise.reject(new Error(response.statusText));
+                    }
+                })
+            const name = url.substring(url.lastIndexOf('/'))
+            folder.file(name, blobPromise)
+        })
+
+        zip.generateAsync({ type: "blob" })
+            .then(blob => saveAs(blob, filename))
+            .catch(e => console.log(e));
+
+
+    }
+
     useEffect(() => {
-        const starCountRef = ref(db, 'sharing');
-        onValue(starCountRef, (snapshot) => {
+        const textRef = ref(db, 'text-sharing');
+        onValue(textRef, (snapshot) => {
             const data = snapshot.val();
             setTextValue(data.text);
             if (data.text) {
                 setIsText(true)
             }
+        });
+
+        const fileRef = ref(db, 'file-sharing');
+        onValue(fileRef, (snapshot) => {
+            const data = snapshot.val();
+            setFiles(data.files)
         });
     }, [])
 
@@ -87,6 +184,7 @@ function HomePage() {
                         <div className="text-section">
                             <h1>Text</h1>
                             <div className="resize-section">
+                                {/* <CodeEditor /> */}
                                 <TextArea
                                     value={textValue}
                                     onChange={(e) => {
@@ -131,18 +229,18 @@ function HomePage() {
                             <div className="files-header">
                                 <h1>Files</h1>
                                 <div className="files-btn">
-                                    <div className="download-btn">
+                                    <div onClick={downloadAll} className="download-btn">
                                         <FaDownload />
                                         Download All
                                     </div>
-                                    <div onClick={() => setFiles([])} className="delete-btn">
+                                    <div onClick={deleteAllFiles} className="delete-btn">
                                         <MdDelete />
                                         Delete All
                                     </div>
                                 </div>
                             </div>
-                            {files.length ?
-                                <FilesList files={files} onDrop={onDrop} />
+                            {tempFiles.length || files.length ?
+                                <FilesList tempFiles={tempFiles} files={files} onDrop={onDrop} />
                                 :
                                 <DropZone
                                     onDrop={onDrop}

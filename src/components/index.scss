@@ -57,7 +57,7 @@ $primary-dark-color: #745dff;
     justify-content: center;
     div{
         color: rgba(158, 161, 161, 0.5);
-        width: 58%;
+        width: 50%;
         text-align: center;
         line-height: 30px;
 
@@ -121,3 +121,15 @@ $primary-dark-color: #745dff;
         color: rgba(158, 161, 161, 0.8) !important;
     }
 }
+
+.temp-file {
+    filter: brightness(50%);
+    position: relative;
+
+    .upload-loader {
+        width: 30px;
+        height: 30px;
+        position: absolute;
+    }
+}
+
