@@ -6,7 +6,7 @@ function TextArea({ value, onChange }) {
     const resizeTextArea = (e) => {
         textAreaRef.current.style.height = "24px";
         textAreaRef.current.style.height = textAreaRef.current.scrollHeight + 12 + "px";
-        console.log(textAreaRef.current.style.height);
+        // console.log(textAreaRef.current.style.height);
     }
 
     useEffect(() => {
